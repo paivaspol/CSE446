@@ -4,4 +4,6 @@
 .gradle
 build
 
+*.db
+
 *.class
