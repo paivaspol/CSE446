@@ -1,6 +1,7 @@
-*.class
+.DS_Store
+.*.swp
+*.pyc
+.gradle
+build
 
-# Package Files #
-*.jar
-*.war
-*.ear
+*.class
