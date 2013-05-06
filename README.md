@@ -1,4 +1,8 @@
-CSE446
+CSE446 - Machine Learning
 ======
 
-Machine Learning Project
+A Comparison of Instance-based Learning Approaches used for Yelp Recommendation System.
+
+Team members:
+Vaspol Ruamviboonsuk
+Stephen Joe Jonany
