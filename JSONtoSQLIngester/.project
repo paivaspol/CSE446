@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <projectDescription>
-	<name>JSONtoSQLIngester</name>
+	<name>YelpRatingPredictor</name>
 	<comment></comment>
 	<projects>
 	</projects>
@@ -18,7 +18,13 @@
 		<link>
 			<name>yelp_phoenix_academic_dataset</name>
 			<type>2</type>
-			<locationURI>PARENT-1-PROJECT_LOC/yelp_phoenix_academic_dataset</locationURI>
+			<locationURI>copy_PARENT/yelp_phoenix_academic_dataset</locationURI>
 		</link>
 	</linkedResources>
+	<variableList>
+		<variable>
+			<name>copy_PARENT</name>
+			<value>$%7BPARENT-1-PROJECT_LOC%7D/CSE446</value>
+		</variable>
+	</variableList>
 </projectDescription>
