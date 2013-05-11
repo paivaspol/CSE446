@@ -18,12 +18,21 @@ public class Dataset implements Iterator<Sample> {
 	private int curRangeIndex;
 	private int curSampleIndex;
 	private RealDataset realDataset;
+	private int size;
 
 	public Dataset(RealDataset realDataset, List<Range> ranges) {
-		curRangeIndex = 0;
-		curSampleIndex = 0;
+		resetIterator();
 		this.realDataset = realDataset;
 		this.ranges = ranges;
+		this.size = computeSize();
+	}
+	
+	private int computeSize() {
+		int result = 0;
+		for (Range range : ranges) {
+			result += range.getTo() - range.getFrom();
+		}
+		return result;
 	}
 
 	@Override
@@ -48,5 +57,13 @@ public class Dataset implements Iterator<Sample> {
 		// do nothing
 	}
 
+	public int getSize() {
+		return this.size;
+	}
+	
+	public void resetIterator() {
+		curRangeIndex = 0;
+		curSampleIndex = 0;
+	}
 	
 }
