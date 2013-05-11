@@ -1,6 +1,9 @@
-package learning;
+package model;
+
+import java.util.List;
 
 import data.Dataset;
+import data.Label;
 
 /**
  * 
@@ -18,7 +21,7 @@ public interface LearningModel {
 	 * Get the predicted resuls from the given dataset, without
 	 * using the labels in data
 	 * @param data Dataset with same inputs, but predicted outputs replaced the original output
-	 * @return
+	 * @return labels with order corresponding the the the order of input in dataset
 	 */
-	public Dataset test(Dataset data);
+	public List<Label> test(Dataset data);
 }
