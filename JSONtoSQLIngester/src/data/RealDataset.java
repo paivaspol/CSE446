@@ -1,11 +1,13 @@
 package data;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Scanner;
 
 import com.google.gson.Gson;
 
@@ -17,22 +19,23 @@ public class RealDataset {
 		samples = new LinkedList<Sample>();
 		try {
 			ingestDataset(filename);
-		} catch (FileNotFoundException e) {
+		} catch (Exception e) {
 			throw new RuntimeException();
 		}
 	}
 
-	private void ingestDataset(String filename) throws FileNotFoundException {
-		Scanner scan = new Scanner(new File(filename));
+	private void ingestDataset(String filename) throws IOException {
+		BufferedReader reader = new BufferedReader(new FileReader(new File(filename)));
 		Gson gson = new Gson();
-		while (scan.hasNextLine()) {
-			String line = scan.nextLine();
+		String line = reader.readLine();
+		while (line != null) {
 			Review review = gson.fromJson(line, Review.class);
 			Sample entry = new Sample(review.getUser_id(),
 					review.getBusiness_id(), review.getStars());
 			samples.add(entry);
+			line = reader.readLine();
 		}
-		scan.close();
+		reader.close();
 	}
 	
 	public Sample getSampleAtIndex(int index) {

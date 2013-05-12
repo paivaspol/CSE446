@@ -1,5 +1,10 @@
 package data;
 
+/**
+ * 0-based, to is exclusive
+ * Range(0, 5) -> [0, 1, 2, 3, 4]
+ * @author pai
+ */
 public class Range {
 
 	private int from, to;
