@@ -20,11 +20,12 @@ public class Dataset implements Iterator<Sample> {
 	private RealDataset realDataset;
 	private int size;
 
+	//assumes that ranges are SORTED and NON-INTERSECTING, ranges are end-exclusive
 	public Dataset(RealDataset realDataset, List<Range> ranges) {
-		resetIterator();
 		this.realDataset = realDataset;
 		this.ranges = ranges;
 		this.size = computeSize();
+		resetIterator();
 	}
 	
 	private int computeSize() {
@@ -37,18 +38,25 @@ public class Dataset implements Iterator<Sample> {
 
 	@Override
 	public boolean hasNext() {
-		if (curSampleIndex >= ranges.get(curRangeIndex).getTo()
-				&& curRangeIndex < ranges.size()) {
-			curSampleIndex = 0;
-			curRangeIndex++;
-		}
-		return curRangeIndex < ranges.size()
-				&& curSampleIndex < ranges.get(curRangeIndex).getTo();
+		return curRangeIndex != ranges.size();
 	}
 
 	@Override
 	public Sample next() {
-		return realDataset.getSampleAtIndex(curSampleIndex);
+		//precondition: curSampleIndex point to the next element to return
+		if(!hasNext()){
+			throw new IllegalArgumentException("No more element to return");
+		}
+		
+		Sample ans = realDataset.getSampleAtIndex(curSampleIndex);
+		curSampleIndex++;
+		Range curRange = ranges.get(curRangeIndex);
+		if(curRange.getTo() == curSampleIndex){
+			curRangeIndex++;
+			if(curRangeIndex != ranges.size())
+				curSampleIndex = ranges.get(curRangeIndex).getFrom();
+		}
+		return ans;
 	}
 
 	@Override
@@ -63,7 +71,7 @@ public class Dataset implements Iterator<Sample> {
 	
 	public void resetIterator() {
 		curRangeIndex = 0;
-		curSampleIndex = 0;
+		curSampleIndex = ranges.get(0).getFrom();
 	}
 	
 }

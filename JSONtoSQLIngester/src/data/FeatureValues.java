@@ -17,4 +17,9 @@ public class FeatureValues {
 	public String getUserId() {
 		return userId;
 	}
+	
+	@Override
+	public String toString(){
+		return "(userId = "  + userId + ", restaurantId = " + restaurantId +  ")";
+	}
 }

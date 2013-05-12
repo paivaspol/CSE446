@@ -19,7 +19,8 @@ public class Sample {
 		return label;
 	}
 
-
-	
-
+	@Override
+	public String toString(){
+		return featureVals.toString() + " -> " + label.toString();
+	}
 }

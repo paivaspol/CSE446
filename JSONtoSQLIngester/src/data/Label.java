@@ -10,4 +10,9 @@ public class Label {
 	public double getRating() {
 		return rating;
 	}
+	
+	@Override
+	public String toString(){
+		return rating + "";
+	}
 }

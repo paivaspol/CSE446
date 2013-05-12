@@ -1,5 +1,4 @@
 package model;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -14,7 +13,7 @@ import data.Sample;
  * objective = minimize (SSE + lambda * (weights^2))
  * Where the weights are the w's below:
  * 
- * y_pred = average_restaurant_rating + w0 + w1 * user_bias + w2*restaurant_bias
+ * y_pred = w0 + w1 * average_restaurant_rating + w2 * user_bias + w3 * restaurant_bias
  * @author sjonany
  */
 public class RidgeRegressionModel implements LearningModel{
@@ -57,6 +56,7 @@ public class RidgeRegressionModel implements LearningModel{
 	
 	@Override
 	public void train(Dataset data) {
+		data.resetIterator();
 		double totalRating = 0.0;
 		int countRating = 0;
 
@@ -86,7 +86,7 @@ public class RidgeRegressionModel implements LearningModel{
 			addToMap(countUserRatings, userId, 1.0);
 			addToMap(countRestaurantRatings, restId, 1.0);
 			
-			totalRating += s.getLabel().getRating();
+			totalRating += rating;
 			countRating++;
 		}
 		
@@ -96,7 +96,7 @@ public class RidgeRegressionModel implements LearningModel{
 			this.userAvgRating.put(userId, userAvg);
 			this.globalUserAverageRating += userAvg;
 		}
-		this.globalAverageRating /= totalUserRatings.keySet().size();
+		this.globalUserAverageRating /= totalUserRatings.keySet().size();
 		
 		for(String restId: totalRestaurantRatings.keySet()){
 			double restAvg = totalRestaurantRatings.get(restId)/countRestaurantRatings.get(restId);
@@ -137,6 +137,7 @@ public class RidgeRegressionModel implements LearningModel{
 	 */
 	public List<Label> test(Dataset data) {
 		List<Label> predictions = new ArrayList<Label>();
+		data.resetIterator();
 		while(data.hasNext()){
 			Sample sample = data.next();
 			Double userAvgRating = this.userAvgRating.get(sample.getFeatureValues().getUserId());
@@ -160,10 +161,10 @@ public class RidgeRegressionModel implements LearningModel{
 	//w_ridge = (HtH + lambda*(I_o+k))^-1 + Ht t
 	public static double[] calcWRidge(Matrix H, Matrix T, double lambda){
 		Matrix H_trans = H.transpose();
-		Matrix I = Matrix.identity(H.getColumnDimension()+1, H.getColumnDimension()+1);
+		Matrix I = Matrix.identity(H.getColumnDimension(), H.getColumnDimension());
 		I.set(0, 0, 0);
 		
-		Matrix wRidgeMat = H_trans.times(H).plus(I.times(lambda)).inverse().plus(H_trans.times(T));
+		Matrix wRidgeMat = H_trans.times(H).plus(I.times(lambda)).inverse().times(H_trans.times(T));
 		return wRidgeMat.transpose().getArray()[0];
 	}
 	
