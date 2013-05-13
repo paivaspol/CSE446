@@ -9,16 +9,16 @@ import java.util.Map;
  * @author sjonany
  */
 public class Parameters {
-	private Map<String, Double> params;
+	private Map<String, String> params;
 	public Parameters(){
-		params = new HashMap<String, Double>();
+		params = new HashMap<String, String>();
 	}
 	
-	public void setParam(String key, Double val){
+	public void setParam(String key, String val){
 		params.put(key,  val);
 	}
 	
-	public double getParam(String key){
+	public String getParam(String key){
 		return params.get(key);
 	}
 }

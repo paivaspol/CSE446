@@ -24,9 +24,9 @@ public class SampleDriver {
 		ranges.add(new Range(0,20000));
 		Dataset toyData = new Dataset(overallData, ranges);
 		
-		for(int lambda = 5; lambda <= 100; lambda++){
+		for(int lambda = 0; lambda <= 100; lambda++){
 			Parameters param = new Parameters();
-			param.setParam(RidgeRegressionModel.ParameterKeys.RIDGE_PENALTY.name(), 1.0*lambda);
+			param.setParam(RidgeRegressionModel.ParameterKeys.RIDGE_PENALTY.name(), ""+1.0*lambda);
 			RidgeRegressionModel model = new RidgeRegressionModel(param);		
 			model.train(toyData);
 			List<Label> preds = model.test(toyData);

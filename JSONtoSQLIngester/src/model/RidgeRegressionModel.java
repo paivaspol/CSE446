@@ -46,7 +46,7 @@ public class RidgeRegressionModel implements LearningModel{
 	private Map<String, Double> restaurantAvgRating;
 	
 	public RidgeRegressionModel(Parameters p){
-		this.lambda = p.getParam(ParameterKeys.RIDGE_PENALTY.name());
+		this.lambda = Double.parseDouble(p.getParam(ParameterKeys.RIDGE_PENALTY.name()));
 		
 		this.userAvgRating = new HashMap<String, Double>();
 		this.restaurantAvgRating = new HashMap<String, Double>();
