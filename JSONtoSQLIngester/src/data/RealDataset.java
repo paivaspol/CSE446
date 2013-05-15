@@ -23,6 +23,10 @@ public class RealDataset {
 			throw new RuntimeException();
 		}
 	}
+	
+	public RealDataset(List<Sample> samples){
+		this.samples = samples;
+	}
 
 	private void ingestDataset(String filename) throws IOException {
 		BufferedReader reader = new BufferedReader(new FileReader(new File(filename)));

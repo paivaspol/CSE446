@@ -6,5 +6,6 @@
 	<classpathentry kind="lib" path="jars/sqlite4java.jar"/>
 	<classpathentry kind="lib" path="jars/gson-2.2.3.jar"/>
 	<classpathentry kind="lib" path="jars/Jama-1.0.3.jar"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/4"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
