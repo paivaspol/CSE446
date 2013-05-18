@@ -1,5 +1,6 @@
 package data;
 
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
@@ -64,11 +65,24 @@ public class Dataset implements Iterator<Sample> {
 		// TODO Auto-generated method stub
 		// do nothing
 	}
+	
+	public void split(int from, int to) {
+		ranges = realDataset.split(from, to);
+		resetIterator();
+	}
+	
+	public void split(Range r) {
+		ranges = realDataset.split(r);
+		resetIterator();
+	}
 
 	public int getSize() {
 		return this.size;
 	}
 	
+	/**
+	 * resets the iterator
+	 */
 	public void resetIterator() {
 		curRangeIndex = 0;
 		curSampleIndex = ranges.get(0).getFrom();

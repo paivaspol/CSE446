@@ -63,5 +63,9 @@ public class RealDataset {
 		}
 		return result;
 	}
+	
+	public List<Range> split(Range r) {
+		return split(r.getFrom(), r.getTo());
+	}
 
 }
