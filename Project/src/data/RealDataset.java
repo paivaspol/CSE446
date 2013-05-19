@@ -20,7 +20,7 @@ public class RealDataset {
 		try {
 			ingestDataset(filename);
 		} catch (Exception e) {
-			throw new RuntimeException();
+			throw new RuntimeException(e);
 		}
 	}
 

@@ -21,11 +21,19 @@ public class Dataset implements Iterator<Sample> {
 	private RealDataset realDataset;
 	private int size;
 
+	public Dataset(RealDataset realDataset) {
+		this(realDataset, null);
+	}
+	
 	//assumes that ranges are SORTED and NON-INTERSECTING, ranges are end-exclusive
 	public Dataset(RealDataset realDataset, List<Range> ranges) {
 		this.realDataset = realDataset;
 		this.ranges = ranges;
-		this.size = computeSize();
+		if (ranges != null) {
+			this.size = computeSize();
+		} else {
+			this.size = realDataset.getSize();
+		}
 		resetIterator();
 	}
 	
@@ -69,11 +77,11 @@ public class Dataset implements Iterator<Sample> {
 	public void split(int from, int to) {
 		ranges = realDataset.split(from, to);
 		resetIterator();
+		this.size = computeSize();
 	}
 	
 	public void split(Range r) {
-		ranges = realDataset.split(r);
-		resetIterator();
+		this.split(r.getFrom(), r.getTo());
 	}
 
 	public int getSize() {
@@ -85,7 +93,9 @@ public class Dataset implements Iterator<Sample> {
 	 */
 	public void resetIterator() {
 		curRangeIndex = 0;
-		curSampleIndex = ranges.get(0).getFrom();
+		if (ranges != null) {
+			curSampleIndex = ranges.get(0).getFrom();
+		}
 	}
 	
 }
