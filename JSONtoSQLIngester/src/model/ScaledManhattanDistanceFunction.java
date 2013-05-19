@@ -1,9 +1,7 @@
 package model;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-
 import data.Dataset;
 import data.Sample;
 
@@ -14,7 +12,7 @@ import data.Sample;
  */
 public class ScaledManhattanDistanceFunction implements UserDistanceFunction{
 	//default distance between two users if there is no way to compare them
-	private static double DEFAULT_DISTANCE = 1.0;
+	public static final double DEFAULT_DISTANCE = 1.0;
 	
 	//key = user Id, value = the ratings he gave for each restaurant
 	private Map<String, Map<String, Double>> userMap;
