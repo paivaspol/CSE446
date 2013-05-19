@@ -29,7 +29,7 @@ public abstract class UserBasedInstanceModel implements LearningModel{
 	@Override
 	public void train(Dataset data) {
 		data.resetIterator();
-		int totalRating = 0;
+		double totalRating = 0;
 		int countRating = 0;
 		while(data.hasNext()){
 			Sample s = data.next();
