@@ -103,7 +103,6 @@ public class ExpectedDifferenceDistanceFunction implements UserDistanceFunction{
 	}
 
 	@Override
-	//TODO: too slow, need to optimize. when user1 and user2 both have not been to a restaurant, we can optimize
 	public double getDistance(String user1, String user2) {
 		UserPair pairKey = new UserPair(user1, user2);
 		if(userPairDistanceCache.containsKey(pairKey)){
