@@ -3,8 +3,9 @@ package evaluation;
 import java.util.ArrayList;
 import java.util.List;
 
+import model.KNNModel;
 import model.Parameters;
-import model.RidgeRegressionModel;
+import model.ScaledManhattanDistanceFunction;
 import config.JoeConfig;
 import data.Dataset;
 import data.Label;
@@ -27,10 +28,16 @@ public class SampleDriver {
 		ranges.add(new Range(0,20000));
 		Dataset toyData = new Dataset(overallData, ranges);
 		
-		for(int lambda = 1000; lambda <= 1000; lambda+=10){
+		for(int lambda = 5; lambda <= 100; lambda++){
 			Parameters param = new Parameters();
-			param.setParam(RidgeRegressionModel.ParameterKeys.RIDGE_PENALTY.name(), 1.0*lambda);
+			
+			param.setParam(KNNModel.ParameterKeys.K.name(), "10");
+			KNNModel model = new KNNModel(param, new ScaledManhattanDistanceFunction());
+			
+			/*
+			param.setParam(RidgeRegressionModel.ParameterKeys.RIDGE_PENALTY.name(), ""+1.0*lambda);
 			RidgeRegressionModel model = new RidgeRegressionModel(param);		
+			*/
 			model.train(toyData);
 			List<Label> preds = model.test(toyData);
 			System.out.println(lambda + " -> " + EvaluationUtils.calcAvgSSE(preds, toyData));

@@ -5,7 +5,7 @@ public class FeatureValues {
 	private String restaurantId;
 	private String userId;
 
-	public FeatureValues(String rId, String uId) {
+	public FeatureValues(String uId, String rId) {
 		this.restaurantId = rId;
 		this.userId = uId;
 	}
