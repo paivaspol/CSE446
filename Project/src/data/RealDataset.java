@@ -20,7 +20,7 @@ public class RealDataset {
 		try {
 			ingestDataset(filename);
 		} catch (Exception e) {
-			throw new RuntimeException();
+			throw new RuntimeException(e);
 		}
 	}
 	
@@ -66,6 +66,10 @@ public class RealDataset {
 			result.add(new Range(to, samples.size()));
 		}
 		return result;
+	}
+	
+	public List<Range> split(Range r) {
+		return split(r.getFrom(), r.getTo());
 	}
 
 }

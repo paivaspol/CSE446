@@ -1,0 +1,6 @@
+{"user_id": "sUNkXg8-KFtCMQDV6zRzQg", "stars": 5, "business_id": "nMHhuYan8e3cONo3PornJA"}
+{"user_id": "sUNkXg8-KFtCMQDV6zRzQg", "stars": 2, "business_id": "nMHhuYan8e3cONo3PornJB"}
+{"user_id": "sUNkXg8-KFtCMQDV6zRzQg", "stars": 3, "business_id": "nMHhuYan8e3cONo3PornJC"}
+{"user_id": "sUNkXg8-KFtCMQDV6zRzQg", "stars": 2, "business_id": "nMHhuYan8e3cONo3PornJD"}
+{"user_id": "sUNkXg8-KFtCMQDV6zRzQg", "stars": 1, "business_id": "nMHhuYan8e3cONo3PornJE"}
+{"user_id": "sUNkXg8-KFtCMQDV6zRzQg", "stars": 5, "business_id": "nMHhuYan8e3cONo3PornJF"}
