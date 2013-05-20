@@ -3,6 +3,7 @@ package evaluation;
 import java.util.ArrayList;
 import java.util.List;
 
+import model.ExpectedDifferenceDistanceFunction;
 import model.KNNModel;
 import model.Parameters;
 import model.ScaledManhattanDistanceFunction;
@@ -29,7 +30,7 @@ public class SampleDriver {
 			Parameters param = new Parameters();
 			
 			param.setParam(KNNModel.ParameterKeys.K.name(), "10");
-			KNNModel model = new KNNModel(param, new ScaledManhattanDistanceFunction());
+			KNNModel model = new KNNModel(param, new ExpectedDifferenceDistanceFunction());
 			
 			/*
 			param.setParam(RidgeRegressionModel.ParameterKeys.RIDGE_PENALTY.name(), ""+1.0*lambda);

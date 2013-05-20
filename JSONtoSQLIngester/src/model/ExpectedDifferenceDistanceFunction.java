@@ -106,7 +106,7 @@ public class ExpectedDifferenceDistanceFunction implements UserDistanceFunction{
 	 * note: hmm.. actually in this case, we always use restaurants that exist in our training data.
 	 * oh well... might be useful to handle this case someday
 	 */
-	private double calcProbability(String userId, String restId, Rating rating){
+	public double calcProbability(String userId, String restId, Rating rating){
 		if(restIdSet.contains(restId)){
 			if(userMap.containsKey(userId) && userMap.get(userId).containsKey(restId)){
 				if(rating.equals(userMap.get(userId).get(restId))){
