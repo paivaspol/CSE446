@@ -34,7 +34,7 @@ public class CrossValidationTest {
 	public void test() {
 		int k = 6;
 		Parameters param = new Parameters();
-		param.setParam(RidgeRegressionModel.ParameterKeys.RIDGE_PENALTY.name(), 0.5);
+		param.setParam(RidgeRegressionModel.ParameterKeys.RIDGE_PENALTY.name(), "0.5");
 		CrossValidation cv = new CrossValidation(new RidgeRegressionModel(param), dataset, k);
 		double result = cv.crossValidate();
 	}
