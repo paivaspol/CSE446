@@ -24,4 +24,8 @@ public class Range {
 	public int getTo() {
 		return to;
 	}
+	
+	public String toString() {
+		return "from: " + from + ", to: " + to;
+	}
 }

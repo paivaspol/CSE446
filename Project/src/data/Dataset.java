@@ -1,6 +1,5 @@
 package data;
 
-import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
@@ -72,16 +71,6 @@ public class Dataset implements Iterator<Sample> {
 	public void remove() {
 		// TODO Auto-generated method stub
 		// do nothing
-	}
-	
-	public void split(int from, int to) {
-		ranges = realDataset.split(from, to);
-		resetIterator();
-		this.size = computeSize();
-	}
-	
-	public void split(Range r) {
-		this.split(r.getFrom(), r.getTo());
 	}
 
 	public int getSize() {
