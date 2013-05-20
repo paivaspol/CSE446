@@ -30,14 +30,25 @@ public class ExpectedDifferenceDistanceFunction implements UserDistanceFunction{
 	//global probability of any rating, as calculated from the data distribution
 	//key = rating, value = probability
 	private Map<Rating,Double> globalProbDistribution;
+	
 	//all known restaurant ids
 	private Set<String> restIdSet;
+	
+	/////////////////
+	//caches
+
+	//key = restId, value = expected |r1-r2| for the restaurant for two unknown user ratings
+	private Map<String, Double> restExpectation;
+	//key user pair, value = distance between two users
+	private Map<UserPair, Double> userPairDistanceCache;
 	
 	public ExpectedDifferenceDistanceFunction(){
 		userMap = new HashMap<String,Map<String, Rating>>();
 		restaurantProbDistribution = new HashMap<String, Map<Rating,Double>>();
 		restIdSet = new HashSet<String>();
 		globalProbDistribution = new HashMap<Rating,Double>();
+		restExpectation = new HashMap<String, Double>();
+		userPairDistanceCache = new HashMap<UserPair, Double>();
 	}
 	
 	@Override
@@ -76,23 +87,53 @@ public class ExpectedDifferenceDistanceFunction implements UserDistanceFunction{
 			this.restaurantProbDistribution.put(restId, getNormalizedDistribution(restaurantTally.get(restId)));
 		}
 		
+		for(String restId : restIdSet){
+			double expectation = 0.0;
+			for(Rating r1 : Rating.values()){
+				for(Rating r2 : Rating.values()){
+					expectation += Math.abs(r1.getRatingValue() - r2.getRatingValue()) * 
+							 getProbability(this.restaurantProbDistribution.get(restId), r1) * 
+							 getProbability(this.restaurantProbDistribution.get(restId), r2);
+				}
+			}
+			restExpectation.put(restId, expectation);
+		}
+		
 		this.globalProbDistribution = getNormalizedDistribution(globalTally);
 	}
 
 	@Override
 	//TODO: too slow, need to optimize. when user1 and user2 both have not been to a restaurant, we can optimize
 	public double getDistance(String user1, String user2) {
+		UserPair pairKey = new UserPair(user1, user2);
+		if(userPairDistanceCache.containsKey(pairKey)){
+			return userPairDistanceCache.get(pairKey);
+		}
+		
 		double expectation = 0.0;
 		for(String restId : restIdSet){
-			for(Rating r1 : Rating.values()){
+			//do we have exact ratings for this <user, rest> pair?
+			boolean isUser1Visit = userMap.containsKey(user1) && userMap.get(user1).containsKey(restId);
+			boolean isUser2Visit = userMap.containsKey(user2) && userMap.get(user2).containsKey(restId);
+			if(!isUser1Visit && !isUser2Visit){
+				expectation += restExpectation.get(restId);
+			}else if(isUser1Visit){
+				Rating r1 = userMap.get(user1).get(restId);
 				for(Rating r2 : Rating.values()){
+					expectation += Math.abs(r1.getRatingValue() - r2.getRatingValue()) * 
+							calcProbability(user1, restId, r1) * 
+							calcProbability(user2, restId, r2);
+				}
+			}else{
+				Rating r2 = userMap.get(user2).get(restId);
+				for(Rating r1 : Rating.values()){
 					expectation += Math.abs(r1.getRatingValue() - r2.getRatingValue()) * 
 							calcProbability(user1, restId, r1) * 
 							calcProbability(user2, restId, r2);
 				}
 			}
 		}
-		
+		userPairDistanceCache.put(pairKey, expectation);
 		return expectation;
 	}
 	
@@ -171,5 +212,36 @@ public class ExpectedDifferenceDistanceFunction implements UserDistanceFunction{
 			}
 		}
 		return distribution;
+	}
+	
+	private static class UserPair{
+		private String user1;
+		private String user2;
+		
+		public UserPair(String u1, String u2){
+			if(u1.compareTo(u2) < 0){
+				this.user1 = u1;
+				this.user2 = u2;
+			}else{
+				this.user1 = u2;
+				this.user2 = u1;
+			}
+		}
+		
+		@Override
+		public boolean equals(Object other){
+			if(!(other instanceof UserPair)){
+				return false;
+			}else{
+				UserPair o = (UserPair) other;
+				return o.user1.equals(this.user1) &&
+						o.user2.equals(this.user2);
+			}
+		}
+		
+		@Override
+		public int hashCode(){
+			return this.user1.hashCode() + 31 * this.user2.hashCode();
+		}
 	}
 }
