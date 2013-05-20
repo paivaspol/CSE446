@@ -32,6 +32,7 @@ public class ExpectedDifferenceDistanceFunction implements UserDistanceFunction{
 	private Map<Rating,Double> globalProbDistribution;
 	//all known restaurant ids
 	private Set<String> restIdSet;
+	
 	public ExpectedDifferenceDistanceFunction(){
 		userMap = new HashMap<String,Map<String, Rating>>();
 		restaurantProbDistribution = new HashMap<String, Map<Rating,Double>>();
@@ -79,6 +80,7 @@ public class ExpectedDifferenceDistanceFunction implements UserDistanceFunction{
 	}
 
 	@Override
+	//TODO: too slow, need to optimize. when user1 and user2 both have not been to a restaurant, we can optimize
 	public double getDistance(String user1, String user2) {
 		double expectation = 0.0;
 		for(String restId : restIdSet){
