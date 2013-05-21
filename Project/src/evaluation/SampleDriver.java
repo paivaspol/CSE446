@@ -21,7 +21,7 @@ public class SampleDriver {
 	public static final String PAI_PATH = "/Users/paivaspol/Dropbox/work/UW/Spring2013/CSE446/Project/CSE446/yelp_phoenix_academic_dataset/yelp_academic_dataset_review.json";
 	
 	public static void main(String[] args){
-		RealDataset overallData = new RealDataset(PAI_PATH);
+		RealDataset overallData = new RealDataset(JoeConfig.REALDATA_DIR);
 		List<Range> ranges = new ArrayList<Range>();
 		//note: with 20,000 ratings, seems to take 9 seconds, 
 		//~9 times for 10,000 ratings for each training
