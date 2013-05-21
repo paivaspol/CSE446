@@ -40,14 +40,12 @@ public class CrossValidation {
 		System.out.println("Cross validating...");
 		int sizePerChunk = dataset.getSize() / k; // got size
 		double sumError = 0.0;
-		int iteration = 0;
-		initialize(0, sizePerChunk);  // so we get the correct size
+		dataset.split(new Range(0, sizePerChunk));
 		// for each of the validation set
 		for (int i = 0; i < k; i++) {
-			System.out.println("iteration: " + iteration);
 			int startValidationRange = i * sizePerChunk;
 			int endValidationRange = startValidationRange + sizePerChunk;
-			List<Range> ranges = initialize(startValidationRange, endValidationRange);
+			List<Range> ranges = dataset.split(new Range(startValidationRange, endValidationRange));
 			
 			// Generate the ranges
 			List<Range> validationRangeList = new ArrayList<Range>();
@@ -61,12 +59,13 @@ public class CrossValidation {
 			printRanges(validationRangeList, trainingRangeList);
 			
 			// Do cv.
+			System.out.println("training...");
 			model.train(trainingSet);
+			System.out.println("predicting...");
 			List<Label> predictions = model.test(validationSet);
 			System.out.println(predictions);
 			sumError += EvaluationUtils.calcAvgSSE(predictions, validationSet);
 			// move to the next chunk
-			iteration++;
 		}
 		return sumError / k;
 	}
@@ -77,11 +76,6 @@ public class CrossValidation {
 		System.out.println("\t" + validationRangeList);
 		System.out.println("Training Set Range:");
 		System.out.println("\t" + trainingRangeList);
-	}
-	
-	public List<Range> initialize(int from, int to) {
-		System.out.println("from: " + from + ", to: " + to);
-		return dataset.split(new Range(from, to));
 	}
 	
 }

@@ -1,5 +1,7 @@
 package data;
 
+import java.util.List;
+
 public class Business {
 
 	private String type;
@@ -13,7 +15,14 @@ public class Business {
 	private double longtitude;
 	private double stars;
 	private int review_count;
+	private List<String> categories;
 	
+	public List<String> getCategories() {
+		return categories;
+	}
+	public void setCategories(List<String> categories) {
+		this.categories = categories;
+	}
 	public String getType() {
 		return type;
 	}
