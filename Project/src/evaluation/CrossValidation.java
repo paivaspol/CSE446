@@ -63,7 +63,6 @@ public class CrossValidation {
 			model.train(trainingSet);
 			System.out.println("predicting...");
 			List<Label> predictions = model.test(validationSet);
-			System.out.println(predictions);
 			sumError += EvaluationUtils.calcAvgSSE(predictions, validationSet);
 			// move to the next chunk
 		}
