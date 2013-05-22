@@ -52,7 +52,7 @@ public class CrossValidation {
 			validationRangeList.add(ranges.get(0));
 			List<Range> trainingRangeList = new ArrayList<Range>();
 			for (int j = 1; j < ranges.size(); j++) {
-				trainingRangeList.add(ranges.get(j));
+				trainingRangeList.add(ranges.get(j));	
 			}
 			Dataset validationSet = new Dataset(dataset, validationRangeList);
 			Dataset trainingSet = new Dataset(dataset, trainingRangeList);
@@ -63,7 +63,9 @@ public class CrossValidation {
 			model.train(trainingSet);
 			System.out.println("predicting...");
 			List<Label> predictions = model.test(validationSet);
-			sumError += EvaluationUtils.calcAvgSSE(predictions, validationSet);
+			double curError = EvaluationUtils.calcAvgSSE(predictions, validationSet);
+			sumError += curError;
+			System.out.println("Current error of chunk " + (i+1) + " = " + curError);
 			// move to the next chunk
 		}
 		return sumError / k;

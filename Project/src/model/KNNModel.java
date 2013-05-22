@@ -74,7 +74,12 @@ public class KNNModel extends UserBasedInstanceModel{
 	public List<Label> test(Dataset data) {
 		List<Label> predictions = new ArrayList<Label>();
 		data.resetIterator();
+		int count = 0;
 		while(data.hasNext()){
+			if(count %1000 ==0){
+				System.out.println("Completed prediction #" + count);
+			}
+			count++;
 			Sample sample = data.next();
 			predictions.add(predictLabel(sample.getFeatureValues()));
 		}

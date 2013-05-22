@@ -15,7 +15,7 @@ public class RealDataset {
 	private List<Sample> samples;
 
 	public RealDataset(String filename) {
-		samples = new LinkedList<Sample>();
+		samples = new ArrayList<Sample>();
 		try {
 			ingestDataset(filename);
 		} catch (Exception e) {

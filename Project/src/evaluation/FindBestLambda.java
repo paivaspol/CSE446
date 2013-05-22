@@ -5,15 +5,16 @@ import java.io.PrintStream;
 import java.util.Map;
 import java.util.TreeMap;
 
+import model.ExpectedDifferenceDistanceFunction;
+import model.KNNModel;
 import model.Parameters;
-import model.RidgeRegressionModel;
 import data.RealDataset;
 
 public class FindBestLambda {
 
 	private static final String FILENAME = "data.train";
-	private static final int maxLambda = 100;
-	private static final int lambdaStep = 5;
+	private static final int maxLambda = 100000;
+	private static final int lambdaStep = 1;
 	private static final int k = 6;
 	
 	public static void main(String[] args) throws Throwable {
@@ -23,12 +24,12 @@ public class FindBestLambda {
 		int minLambda = -1;
 		double minErrorRate = Double.MAX_VALUE;
 		long startTime = System.currentTimeMillis();
-		for (int i = 0; i < maxLambda; i += lambdaStep) {
+		for (int i = 1; i <= maxLambda; i += lambdaStep) {
 			out.println("lambda = " + i);
 			out.print("\t");
 			Parameters param = new Parameters();
-			param.setParam(RidgeRegressionModel.ParameterKeys.RIDGE_PENALTY.name(), String.valueOf(i));
-			CrossValidation cv = new CrossValidation(new RidgeRegressionModel(param), realDataset, k);
+			param.setParam(KNNModel.ParameterKeys.K.name(), String.valueOf(i));
+			CrossValidation cv = new CrossValidation(new KNNModel(param, new ExpectedDifferenceDistanceFunction()), realDataset, k);
 			double result = cv.crossValidate();
 			out.println("error = " + result);
 			errorRate.put(i, result);
@@ -36,6 +37,7 @@ public class FindBestLambda {
 			if (Double.compare(minErrorRate, result) == 0) {
 				minLambda = i;
 			}
+			out.flush();
 		}
 		long endTime = System.currentTimeMillis();
 		out.close();

@@ -16,8 +16,13 @@ public class ScaledManhattanDistanceFunction implements UserDistanceFunction{
 	
 	//key = user Id, value = the ratings he gave for each restaurant
 	private Map<String, Map<String, Double>> userMap;
+
+	//key user pair, value = distance between two users
+	private Map<UserPair, Double> userPairDistanceCache;
+	
 	public ScaledManhattanDistanceFunction(){
 		userMap = new HashMap<String,Map<String, Double>> ();
+		userPairDistanceCache = new HashMap<UserPair, Double>();
 	}
 	
 	@Override
@@ -45,6 +50,10 @@ public class ScaledManhattanDistanceFunction implements UserDistanceFunction{
 	 */
 	@Override
 	public double getDistance(String user1, String user2) {
+		UserPair pairKey = new UserPair(user1, user2);
+		if(userPairDistanceCache.containsKey(pairKey)){
+			return userPairDistanceCache.get(pairKey);
+		}
 		Map<String, Double> ratings1 = userMap.get(user1);
 		Map<String, Double> ratings2 = userMap.get(user2);
 		if(ratings1 == null){
@@ -62,12 +71,15 @@ public class ScaledManhattanDistanceFunction implements UserDistanceFunction{
 				totalManhattan += Math.abs(ratings1.get(rest1) - ratings2.get(rest1));
 			}
 		}
-		
+
+		double distance = 0.0;
 		if(countIntersect == 0){
-			return DEFAULT_DISTANCE;
+			distance = DEFAULT_DISTANCE;
 		}else{
-			return totalManhattan / countIntersect;
+			distance = totalManhattan / countIntersect;
 		}
+		userPairDistanceCache.put(pairKey, distance);
+		return distance;
 	}
 
 }

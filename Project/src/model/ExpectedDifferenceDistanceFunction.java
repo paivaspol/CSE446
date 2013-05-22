@@ -116,6 +116,10 @@ public class ExpectedDifferenceDistanceFunction implements UserDistanceFunction{
 			boolean isUser2Visit = userMap.containsKey(user2) && userMap.get(user2).containsKey(restId);
 			if(!isUser1Visit && !isUser2Visit){
 				expectation += restExpectation.get(restId);
+			}else if(isUser1Visit && isUser2Visit){
+				Rating r1 = userMap.get(user1).get(restId);
+				Rating r2 = userMap.get(user2).get(restId);
+				expectation += Math.abs(r1.getRatingValue()-r2.getRatingValue());
 			}else if(isUser1Visit){
 				Rating r1 = userMap.get(user1).get(restId);
 				for(Rating r2 : Rating.values()){
@@ -211,36 +215,5 @@ public class ExpectedDifferenceDistanceFunction implements UserDistanceFunction{
 			}
 		}
 		return distribution;
-	}
-	
-	private static class UserPair{
-		private String user1;
-		private String user2;
-		
-		public UserPair(String u1, String u2){
-			if(u1.compareTo(u2) < 0){
-				this.user1 = u1;
-				this.user2 = u2;
-			}else{
-				this.user1 = u2;
-				this.user2 = u1;
-			}
-		}
-		
-		@Override
-		public boolean equals(Object other){
-			if(!(other instanceof UserPair)){
-				return false;
-			}else{
-				UserPair o = (UserPair) other;
-				return o.user1.equals(this.user1) &&
-						o.user2.equals(this.user2);
-			}
-		}
-		
-		@Override
-		public int hashCode(){
-			return this.user1.hashCode() + 31 * this.user2.hashCode();
-		}
 	}
 }
