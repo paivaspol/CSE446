@@ -12,6 +12,8 @@ import data.Label;
 public interface LearningModel {
 	/**
 	 * trains learning model based on the data set
+	 * this is CUMULATIVE, so calling train() successively on the model causes to the model 
+	 * to accumulate its experience
 	 * @param data
 	 */
 	public void train(Dataset data);
@@ -24,4 +26,9 @@ public interface LearningModel {
 	 * @return labels with order corresponding the the the order of input in dataset
 	 */
 	public List<Label> test(Dataset data);
+	
+	/**
+	 * reset the model and forget the experience learnt from any training
+	 */
+	public void reset();
 }

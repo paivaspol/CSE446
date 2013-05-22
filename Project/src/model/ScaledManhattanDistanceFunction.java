@@ -21,6 +21,11 @@ public class ScaledManhattanDistanceFunction implements UserDistanceFunction{
 	private Map<UserPair, Double> userPairDistanceCache;
 	
 	public ScaledManhattanDistanceFunction(){
+		reset();
+	}
+	
+	@Override 
+	public void reset(){
 		userMap = new HashMap<String,Map<String, Double>> ();
 		userPairDistanceCache = new HashMap<UserPair, Double>();
 	}

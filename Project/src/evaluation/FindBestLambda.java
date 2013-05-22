@@ -8,6 +8,7 @@ import java.util.TreeMap;
 import model.ExpectedDifferenceDistanceFunction;
 import model.KNNModel;
 import model.Parameters;
+import model.ScaledManhattanDistanceFunction;
 import data.RealDataset;
 
 public class FindBestLambda {
@@ -15,27 +16,28 @@ public class FindBestLambda {
 	private static final String FILENAME = "data.train";
 	private static final int maxLambda = 100000;
 	private static final int lambdaStep = 1;
-	private static final int k = 6;
+	private static final int k = 5;
 	
 	public static void main(String[] args) throws Throwable {
+		int[] KNeighborParams = new int[]{1,5,10,15,20};
 		RealDataset realDataset = new RealDataset(FILENAME);
 		Map<Integer, Double> errorRate = new TreeMap<Integer, Double>();
 		PrintStream out = new PrintStream(new File("lambda.log"));
 		int minLambda = -1;
 		double minErrorRate = Double.MAX_VALUE;
 		long startTime = System.currentTimeMillis();
-		for (int i = 1; i <= maxLambda; i += lambdaStep) {
-			out.println("lambda = " + i);
+		for (int kneighbor : KNeighborParams) {
+			out.println("kneighbor = " + kneighbor);
 			out.print("\t");
 			Parameters param = new Parameters();
-			param.setParam(KNNModel.ParameterKeys.K.name(), String.valueOf(i));
-			CrossValidation cv = new CrossValidation(new KNNModel(param, new ExpectedDifferenceDistanceFunction()), realDataset, k);
+			param.setParam(KNNModel.ParameterKeys.K.name(), String.valueOf(kneighbor));
+			CrossValidation cv = new CrossValidation(new KNNModel(param, new ScaledManhattanDistanceFunction()), realDataset, k);
 			double result = cv.crossValidate();
 			out.println("error = " + result);
-			errorRate.put(i, result);
+			errorRate.put(kneighbor, result);
 			minErrorRate = Math.min(result, minErrorRate);
 			if (Double.compare(minErrorRate, result) == 0) {
-				minLambda = i;
+				minLambda = kneighbor;
 			}
 			out.flush();
 		}

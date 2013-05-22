@@ -23,6 +23,10 @@ public abstract class UserBasedInstanceModel implements LearningModel{
 	protected double globalAverageRating;
 	
 	public UserBasedInstanceModel(){
+		baseReset();
+	}
+	
+	public void baseReset(){
 		this.reviewMap = new HashMap<String, List<Sample>>();
 	}
 	

@@ -12,4 +12,6 @@ public interface UserDistanceFunction {
 	public void init(Dataset dataset, Parameters params);
 	//higher distance means the less related the two users are
 	public double getDistance(String user1, String user2);
+	//clear out all the precomputations
+	public void reset();
 }

@@ -24,6 +24,13 @@ public class KNNModel extends UserBasedInstanceModel{
 		this.numNearestNeighbor = Integer.parseInt(p.getParam(ParameterKeys.K.name()));
 		this.distanceFcn = distanceFcn;
 		this.params = p;
+		reset();
+	}
+	
+	@Override
+	public void reset(){
+		super.baseReset();
+		this.distanceFcn.reset();
 	}
 	
 	

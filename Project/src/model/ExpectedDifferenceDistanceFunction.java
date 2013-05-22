@@ -43,6 +43,11 @@ public class ExpectedDifferenceDistanceFunction implements UserDistanceFunction{
 	private Map<UserPair, Double> userPairDistanceCache;
 	
 	public ExpectedDifferenceDistanceFunction(){
+		reset();
+	}
+	
+	@Override
+	public void reset(){
 		userMap = new HashMap<String,Map<String, Rating>>();
 		restaurantProbDistribution = new HashMap<String, Map<Rating,Double>>();
 		restIdSet = new HashSet<String>();

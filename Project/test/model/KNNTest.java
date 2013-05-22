@@ -144,6 +144,8 @@ public class KNNTest {
 			// TODO Auto-generated method stub
 			
 		}
+		@Override
+		public void reset(){}
 
 		@Override
 		public double getDistance(String user1, String user2) {

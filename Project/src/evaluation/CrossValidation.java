@@ -60,6 +60,7 @@ public class CrossValidation {
 			
 			// Do cv.
 			System.out.println("training...");
+			model.reset();
 			model.train(trainingSet);
 			System.out.println("predicting...");
 			List<Label> predictions = model.test(validationSet);
