@@ -1,5 +1,6 @@
 package data;
 
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
@@ -32,6 +33,8 @@ public class Dataset implements Iterator<Sample> {
 			this.size = computeSize();
 		} else {
 			this.size = realDataset.getSize();
+			this.ranges = new ArrayList<Range>();
+			this.ranges.add(new Range(0, this.size));
 		}
 		resetIterator();
 	}

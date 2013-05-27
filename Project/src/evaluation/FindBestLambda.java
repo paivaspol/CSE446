@@ -8,7 +8,7 @@ import java.util.TreeMap;
 import model.ExpectedDifferenceDistanceFunction;
 import model.KNNModel;
 import model.Parameters;
-import model.ScaledManhattanDistanceFunction;
+import model.RidgeRegressionModel;
 import data.RealDataset;
 
 public class FindBestLambda {
@@ -19,7 +19,7 @@ public class FindBestLambda {
 	private static final int k = 5;
 	
 	public static void main(String[] args) throws Throwable {
-		int[] KNeighborParams = new int[]{1,5,10,15,20};
+		int[] KNeighborParams = new int[]{55,60,65,70,75};
 		RealDataset realDataset = new RealDataset(FILENAME);
 		Map<Integer, Double> errorRate = new TreeMap<Integer, Double>();
 		PrintStream out = new PrintStream(new File("lambda.log"));
@@ -31,7 +31,7 @@ public class FindBestLambda {
 			out.print("\t");
 			Parameters param = new Parameters();
 			param.setParam(KNNModel.ParameterKeys.K.name(), String.valueOf(kneighbor));
-			CrossValidation cv = new CrossValidation(new KNNModel(param, new ScaledManhattanDistanceFunction()), realDataset, k);
+			CrossValidation cv = new CrossValidation(new KNNModel(param, new ExpectedDifferenceDistanceFunction()), realDataset, k);
 			double result = cv.crossValidate();
 			out.println("error = " + result);
 			errorRate.put(kneighbor, result);

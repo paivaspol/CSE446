@@ -1,10 +1,6 @@
-kneighbor = 1
-	error = 2.25001554527965
-kneighbor = 5
-	error = 1.437740351532241
-kneighbor = 10
-	error = 1.3442583720347214
-kneighbor = 15
-	error = 1.3172108670972715
-kneighbor = 20
-	error = 1.3034572868529142
+kneighbor = 55
+	error = 1.299492278903564
+kneighbor = 60
+	error = 1.298178211168596
+kneighbor = 65
+	
