@@ -19,14 +19,13 @@ public class FindBestLambda {
 	private static final int k = 5;
 	
 	public static void main(String[] args) throws Throwable {
-		int[] KNeighborParams = new int[]{55,60,65,70,75};
 		RealDataset realDataset = new RealDataset(FILENAME);
 		Map<Integer, Double> errorRate = new TreeMap<Integer, Double>();
-		PrintStream out = new PrintStream(new File("lambda.log"));
+		PrintStream out = new PrintStream(new File("svd.log"));
 		int minLambda = -1;
 		double minErrorRate = Double.MAX_VALUE;
 		long startTime = System.currentTimeMillis();
-		for (int kneighbor : KNeighborParams) {
+		for (int kneighbor : new int[]{2,3}) {
 			out.println("kneighbor = " + kneighbor);
 			out.print("\t");
 			Parameters param = new Parameters();
