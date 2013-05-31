@@ -1,18 +1,18 @@
 package model;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Scanner;
 import java.util.Set;
 
 import data.Dataset;
 import data.FeatureValues;
 import data.Label;
 import data.Sample;
-import data.Vector;
 
 /**
  * Singular value decomposition using stochastic gradient descent for optimization
@@ -24,8 +24,10 @@ public class SVDModel implements LearningModel{
 	//LAMBDA is the regularizing term
 	public enum ParameterKeys{LEARNING_RATE, LAMBDA, NUM_FEATURES};
 
-	//define SGD convergence if none of vector weights change by this much
-	private static final double CONVERGENCE_LIMIT = 0.0001;
+	//num epochs to optimize a single feature
+	//seems to be a large number from s
+	//http://www.netflixprize.com/community/viewtopic.php?pid=5638
+	private static final double TRAIN_EPOCH = 100;
 
 	private double lambda;
 	private double learningRate;
@@ -35,9 +37,14 @@ public class SVDModel implements LearningModel{
 
 	//key = id, value = the vector corresponding to the id, size = NUM_FEATURES
 	//from the att paper, q_i = restVecs.get(i)
-	private Map<String, Vector> userVecs;
-	private Map<String, Vector> restVecs;
-
+	private double[][] userVecs;
+	private double[][] restVecs;
+	private Map<String, Integer> restIndexMap;
+	private Map<String, Integer> userIndexMap;
+	// map indices back to their original string ids
+	private String[] restInvIndex;
+	private String[] userInvIndex;
+	
 	public SVDModel(Parameters p){
 		this.lambda = Double.parseDouble(p.getParam(ParameterKeys.LAMBDA.name()));
 		this.learningRate = Double.parseDouble(p.getParam(ParameterKeys.LEARNING_RATE.name()));
@@ -64,113 +71,101 @@ public class SVDModel implements LearningModel{
 			totalRating += rating;
 			countRating++;
 		}
+		
+		//key = rest ID, val = rest index, created on the fly so I can address restaurants with numbers
+		this.restIndexMap = new HashMap<String, Integer>();
+		this.userIndexMap = new HashMap<String, Integer>();
+		// map indices back to their original string ids
+		this.restInvIndex = new String[restSet.size()];
+		this.userInvIndex = new String[userSet.size()];
+				
+		Iterator<String> restIt = restSet.iterator();
+		for(int i=0; i<restSet.size(); i++){
+			String rest = restIt.next();
+			restIndexMap.put(rest, i);
+			restInvIndex[i] = rest;
+		}
+
+		Iterator<String> userIt = userSet.iterator();
+		for(int i=0; i<userSet.size(); i++){
+			String user = userIt.next();
+			userInvIndex[i] = user;
+			userIndexMap.put(user, i);
+		}
+		
 		this.globalAvgRating = totalRating / countRating;
 
 		//initialize the vectors for each user and restaurant
-		//we just set to 0
-		for(String user : userSet){
-			userVecs.put(user, getInitialVector());
+		double[] initVector = getInitialVector();
+		this.userVecs = new double[userSet.size()][this.numFeatures];
+		this.restVecs = new double[restSet.size()][this.numFeatures];
+		
+		for(int user = 0; user < userSet.size(); user++){
+			userVecs[user] = initVector.clone();
 		}
-
-		for(String rest : restSet){
-			restVecs.put(rest, getInitialVector());
+		
+		for(int rest = 0; rest < restSet.size(); rest++){
+			restVecs[rest] = initVector.clone();
 		}
 
 		//SGD, until convergence, when the vectors did not change by much 
-		int numIteration = 0;
 		data.resetIterator();
+
 		
-		double prevMSEReg = -1;
-		//boolean onePassIsComplete = false;
-		while(true){
-			Sample s = data.next();
-			String userId = s.getFeatureValues().getUserId();
-			String restId = s.getFeatureValues().getRestaurantId();
-			double rating = s.getLabel().getRating();
-
-			double error = rating - predictRating(userId, restId) ;
-			Vector p_u = userVecs.get(userId);
-			Vector q_i = restVecs.get(restId);
-
-			Vector newUserVec = p_u.plus(q_i.times(error).minus(p_u.times(this.lambda)).times(this.learningRate));
-			p_u = newUserVec;
-			Vector newRestVec = q_i.plus(p_u.times(error).minus(q_i.times(this.lambda)).times(this.learningRate));
-
-			if(newUserVec.containsNan() ||
-					newRestVec.containsNan() ||
-					p_u.containsNan() ||
-					q_i.containsNan()){
-				System.out.println("NAN!!!");
-				System.out.println(p_u);
-				System.out.println(q_i);
-				System.out.println(newUserVec);
-				System.out.println(newRestVec);
-				new Scanner(System.in).nextLine();
-			}
-			//check for convergence, but we can only quit only once we have made a complete pass
-			/*
-			double maxDiff = 0.0;
-			if(onePassIsComplete){
-				boolean isConverge = true;
-				for(int factor=0; factor<this.numFeatures; factor++){
-					double diff1 = Vector.getMaxAbsDifference(userVecs.get(userId), newUserVec);
-					double diff2 = Vector.getMaxAbsDifference(restVecs.get(restId), newRestVec);
-					maxDiff = Math.max(diff1,  diff2);
-					if(diff1 > CONVERGENCE_LIMIT){
-						isConverge = false;
-						break;
-					}
-	
-					if(diff2 > CONVERGENCE_LIMIT){
-						isConverge = false;
-						break;
-					}
-				}
-				if(isConverge){
-					break;
-				}
-			}*/
-
-			userVecs.put(userId, newUserVec);
-			restVecs.put(restId, newRestVec);
-			
-			if(!data.hasNext()){
-				//onePassIsComplete = true;
+		//caches the predictions, which are just dot products
+		//since we are optimizing one feature at a time in an ordered fashion, there is no need to compute
+		//the entire dot product from scratch
+		//key = iteration number, or the dataset index
+		//value = dot product using the first f-1 features, which will remain unchanged once those features are optimized
+		double[] prevPartialDotProduct = new double[data.getSize()];
+		
+		//optimize a feature at a time
+		for(int feature = 0; feature < this.numFeatures; feature++){
+			for(int epoch = 0; epoch < TRAIN_EPOCH; epoch++){
 				data.resetIterator();
-				
-				//calculate the total regularized SSE
-				double totalRegSSE = 0.0;
-				int count = 0;
+				int datasetIndex = 0;
 				while(data.hasNext()){
-					Sample s1 = data.next();
-
-					String userId1 = s1.getFeatureValues().getUserId();
-					String restId1 = s1.getFeatureValues().getRestaurantId();
-					double rating1 = s1.getLabel().getRating();
+					Sample s = data.next();
+					String userId = s.getFeatureValues().getUserId();
+					String restId = s.getFeatureValues().getRestaurantId();
+					double rating = s.getLabel().getRating();
 					
-					totalRegSSE += Math.pow(rating1-predictRating(userId1,restId1), 2) + 
-							this.lambda * (userVecs.get(userId1).getL2NormSq() +
-									restVecs.get(restId1).getL2NormSq());
-					count++;
-				}
-				double MSEReg = totalRegSSE / count;
-
-				System.out.println("current mse_reg = " + MSEReg);
-				if(MSEReg < prevMSEReg && Math.abs(MSEReg - prevMSEReg) < CONVERGENCE_LIMIT){
-					break;
-				}
+					double[] p_u = userVecs[userIndexMap.get(userId)];
+					double[] q_i = restVecs[restIndexMap.get(restId)];
+					
+					//prediction is actualy just p_u dot q_i, but we cache some previous dot products,
+					//since the contributions from the previous feature remain unchanged, and so do
+					//the contributions from the future features
+					double prediction = prevPartialDotProduct[datasetIndex];
+					prediction += p_u[feature] * q_i[feature];
+					prediction += (this.numFeatures - feature - 1) * initVector[feature] * initVector[feature];
+					double error = rating - prediction;
+					
+					double prevPu = p_u[feature];
+					double prevQi = q_i[feature];
+					p_u[feature] += this.learningRate * (error * prevQi - this.lambda * prevPu);
+					q_i[feature] += this.learningRate * (error * prevPu - this.lambda * prevQi);
 				
-				prevMSEReg = MSEReg;
-				data.resetIterator();
-				
-			}
+					//update dot product cache
+					//prevDotProduct[datasetIndex] = prediction;
+					datasetIndex++;
+				}
+				if(epoch % 10 == 0)
+					System.out.println("Optimizing feature " + feature + ", epoch = " + epoch);
+			}//end epoch
 
-			numIteration++;
-			if(numIteration % 100000 == 0){
-				System.out.println("SGD iteration " + numIteration );
+			//the feature has been optimized, time to update the partial dot product cache
+			data.resetIterator();
+			int datasetIndex = 0;
+			while(data.hasNext()){
+				Sample s = data.next();
+				String userId = s.getFeatureValues().getUserId();
+				String restId = s.getFeatureValues().getRestaurantId();
+				prevPartialDotProduct[datasetIndex] += userVecs[userIndexMap.get(userId)][feature] * 
+						restVecs[restIndexMap.get(restId)][feature];
+				datasetIndex++;
 			}
 		}
-		System.out.println("Converged at iteration = " + numIteration);
 	}
 	
 	/**
@@ -181,31 +176,40 @@ public class SVDModel implements LearningModel{
 	 (How it's initialized actually does matter a bit later, but not yet...)"
 
 	 */
-	private Vector getInitialVector(){
+	private double[] getInitialVector(){
 		double[] doub = new double[this.numFeatures];
 		for(int i=0; i<doub.length; i++){
 			doub[i] = 0.1;
 		}
-		return new Vector(doub);
+		return doub;
 	}
 
 
+	/**
+	 * rating prediction with clipping, again from simon http://www.sifter.org/~simon/journal/20061211.html
+	 * @param userId
+	 * @param restId
+	 * @return
+	 */
 	private double predictRating(String userId, String restId){
-		Vector userVec = userVecs.get(userId);
-		Vector restVec = restVecs.get(restId);
-
-		if(userVec == null || restVec == null){
+		if(!userIndexMap.containsKey(userId) || !restIndexMap.containsKey(restId)){
 			return this.globalAvgRating;
 		}
-
-		double result = userVec.dotProduct(restVec);
-		if(Double.isNaN(result)){
-			System.out.println("NAN!!!");
-			System.out.println(userVec);
-			System.out.println(restVec);
-			new Scanner(System.in).nextLine();
+		double[] u = userVecs[userIndexMap.get(userId)];
+		double[] r = restVecs[restIndexMap.get(restId)];
+		
+		double result = 1.0;
+		for(int i=0;i<u.length;i++){
+			result += u[i] * r[i];
+			if(result > 5){
+				result = 5;
+			}
+			
+			if(result < 1){
+				result = 1;
+			}
 		}
-		return userVec.dotProduct(restVec);
+		return result;
 	}
 
 	@Override
@@ -219,13 +223,13 @@ public class SVDModel implements LearningModel{
 			predictions.add(new Label(predictRating(feats.getUserId(), 
 					feats.getRestaurantId())));
 		}
-
+		
 		return predictions;
 	}
 
 	@Override
-	public void reset() {
-		userVecs = new HashMap<String, Vector>();
-		restVecs = new HashMap<String, Vector>();
+	public void reset() {		
+		this.restIndexMap = new HashMap<String, Integer>();
+		this.userIndexMap = new HashMap<String, Integer>();
 	}
 }

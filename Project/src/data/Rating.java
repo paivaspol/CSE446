@@ -5,6 +5,8 @@ package data;
  * useful for comparing between different real user ratings, or when using ratings as keys
  */
 public enum Rating {
+	//oops i screwed up. Turns out only 1,2,3,4,5 for yelp data :(
+	//but it's used for test already, too lazy to change
 	ZERO(0.0), ZERO_POINT_FIVE(0.5),
 	ONE(1.0), ONE_POINT_FIVE(1.5),
 	TWO(2.0), TWO_POINT_FIVE(2.5),

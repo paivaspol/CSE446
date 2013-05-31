@@ -12,6 +12,19 @@ public class Vector{
 		this.l2NormSq = -1;
 	}
 	
+	public void set(int index, double val){
+		arr[index] = val;
+		this.l2NormSq = -1;
+	}
+	
+	public double get(int index){
+		return arr[index];
+	}
+	
+	public int size(){
+		return arr.length;
+	}
+	
 	public double dotProduct(Vector other){
 		double res = 0;
 		for(int i=0;i<arr.length;i++){
