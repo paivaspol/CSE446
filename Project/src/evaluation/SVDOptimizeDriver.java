@@ -25,7 +25,7 @@ public class SVDOptimizeDriver {
 			Parameters p = new Parameters();
 			p.setParam(SVDModel.ParameterKeys.LAMBDA.name(), "" + lambda);
 			p.setParam(SVDModel.ParameterKeys.NUM_FEATURES.name(), "" + 100);
-			p.setParam(SVDModel.ParameterKeys.LEARNING_RATE.name(), "" + 0.002);
+			p.setParam(SVDModel.ParameterKeys.LEARNING_RATE.name(), "" + 0.1);
 			CrossValidation cv = new CrossValidation(new SVDModel(p), realDataset, NUM_FOLD);
 			double result = cv.crossValidate();
 			out.println("error = " + result);

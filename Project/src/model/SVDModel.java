@@ -1,7 +1,6 @@
 package model;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -27,7 +26,7 @@ public class SVDModel implements LearningModel{
 	//num epochs to optimize a single feature
 	//seems to be a large number from s
 	//http://www.netflixprize.com/community/viewtopic.php?pid=5638
-	private static final double TRAIN_EPOCH = 100;
+	private static final double TRAIN_EPOCH = 1000;
 
 	private double lambda;
 	private double learningRate;
@@ -120,6 +119,7 @@ public class SVDModel implements LearningModel{
 		double[] prevPartialDotProduct = new double[data.getSize()];
 		
 		//optimize a feature at a time
+		double prevLoss = -1;
 		for(int feature = 0; feature < this.numFeatures; feature++){
 			for(int epoch = 0; epoch < TRAIN_EPOCH; epoch++){
 				data.resetIterator();
@@ -150,6 +150,14 @@ public class SVDModel implements LearningModel{
 					//prevDotProduct[datasetIndex] = prediction;
 					datasetIndex++;
 				}
+				double curLoss = getRegularizedSquaredError(data);
+				if(prevLoss > curLoss){
+					this.learningRate = 0.01;
+				}else{
+					this.learningRate = 0.1;
+				}
+				prevLoss = curLoss;
+				System.out.println(curLoss);
 				if(epoch % 10 == 0)
 					System.out.println("Optimizing feature " + feature + ", epoch = " + epoch);
 			}//end epoch
@@ -212,6 +220,48 @@ public class SVDModel implements LearningModel{
 		return result;
 	}
 
+	//this is the objective loss function we are trying to minimize
+	private double getRegularizedSquaredError(Dataset data){
+		data.resetIterator();
+		double totalLoss = 0.0;
+		double[] userL2NormSq = new double[userVecs.length];
+		double[] restL2NormSq = new double[restVecs.length];
+		
+		for(int user = 0; user < userL2NormSq.length; user++){
+			double total = 0.0;
+			for(double val : userVecs[user]){
+				total += val*val;
+			}
+			userL2NormSq[user] = total;
+		}
+		
+		for(int rest = 0; rest < restL2NormSq.length; rest++){
+			double total = 0.0;
+			for(double val : restVecs[rest]){
+				total += val*val;
+			}
+			restL2NormSq[rest] = total;
+		}
+		
+		while(data.hasNext()){
+			Sample s = data.next();
+			String userId = s.getFeatureValues().getUserId();
+			String restId = s.getFeatureValues().getRestaurantId();
+			double rating = s.getLabel().getRating();
+			
+			int user = userIndexMap.get(userId);
+			int rest = restIndexMap.get(restId);
+			double[] p_u = userVecs[user];
+			double[] q_i = restVecs[rest];
+			double dot = 0.0;
+			for(int i= 0; i < p_u.length; i++){
+				dot += p_u[i] * q_i[i];
+			}
+			totalLoss += Math.pow(rating - dot, 2) + this.lambda*(restL2NormSq[rest] + userL2NormSq[user]);
+		}
+		return totalLoss;
+	}
+	
 	@Override
 	public List<Label> test(Dataset data) {		
 		List<Label> predictions = new ArrayList<Label>();
