@@ -6,6 +6,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Scanner;
 import java.util.Set;
 
 import data.Dataset;
@@ -16,6 +17,9 @@ import data.Sample;
 /**
  * Singular value decomposition using stochastic gradient descent for optimization
  * based on http://www2.research.att.com/~volinsky/papers/ieeecomputer.pdf page 45
+ * 
+ * after lots of bugs and things I didn't understand , I gave up and referred to
+ * http://www.timelydevelopment.com/demos/NetflixPrize.aspx
  * @author sjonany
  */
 public class SVDModel implements LearningModel{
@@ -26,8 +30,12 @@ public class SVDModel implements LearningModel{
 	//num epochs to optimize a single feature
 	//seems to be a large number from s
 	//http://www.netflixprize.com/community/viewtopic.php?pid=5638
-	private static final double TRAIN_EPOCH = 1000;
-
+	private static final int MIN_TRAIN_EPOCH = 120;
+	
+	//init value for user and rest vecs
+	private static final double INIT_VEC = 0.1;
+	//if current feature does not improve its rmse by this much, stop
+	private static final double MIN_IMPROVE = 0.0001;
 	private double lambda;
 	private double learningRate;
 	private int numFeatures;
@@ -109,7 +117,6 @@ public class SVDModel implements LearningModel{
 
 		//SGD, until convergence, when the vectors did not change by much 
 		data.resetIterator();
-
 		
 		//caches the predictions, which are just dot products
 		//since we are optimizing one feature at a time in an ordered fashion, there is no need to compute
@@ -119,9 +126,11 @@ public class SVDModel implements LearningModel{
 		double[] prevPartialDotProduct = new double[data.getSize()];
 		
 		//optimize a feature at a time
-		double prevLoss = -1;
 		for(int feature = 0; feature < this.numFeatures; feature++){
-			for(int epoch = 0; epoch < TRAIN_EPOCH; epoch++){
+			double lastRmse = 2.0;
+			double rmse = 2.0;
+			for(int epoch = 0; epoch < MIN_TRAIN_EPOCH || (rmse <= lastRmse - MIN_IMPROVE); epoch++){
+				double sse = 0.0;
 				data.resetIterator();
 				int datasetIndex = 0;
 				while(data.hasNext()){
@@ -130,17 +139,21 @@ public class SVDModel implements LearningModel{
 					String restId = s.getFeatureValues().getRestaurantId();
 					double rating = s.getLabel().getRating();
 					
-					double[] p_u = userVecs[userIndexMap.get(userId)];
-					double[] q_i = restVecs[restIndexMap.get(restId)];
+					int user = userIndexMap.get(userId);
+					int rest = restIndexMap.get(restId);
+					double[] p_u = userVecs[user];
+					double[] q_i = restVecs[rest];
 					
 					//prediction is actualy just p_u dot q_i, but we cache some previous dot products,
 					//since the contributions from the previous feature remain unchanged, and so do
 					//the contributions from the future features
-					double prediction = prevPartialDotProduct[datasetIndex];
-					prediction += p_u[feature] * q_i[feature];
-					prediction += (this.numFeatures - feature - 1) * initVector[feature] * initVector[feature];
+					double prediction = predictRating(user, rest, feature, prevPartialDotProduct[datasetIndex], true);
 					double error = rating - prediction;
-					
+					if(error > 5){
+						new Scanner(System.in).nextLine();
+						System.out.println(error);
+					}
+					sse += error * error;
 					double prevPu = p_u[feature];
 					double prevQi = q_i[feature];
 					p_u[feature] += this.learningRate * (error * prevQi - this.lambda * prevPu);
@@ -150,16 +163,9 @@ public class SVDModel implements LearningModel{
 					//prevDotProduct[datasetIndex] = prediction;
 					datasetIndex++;
 				}
-				double curLoss = getRegularizedSquaredError(data);
-				if(prevLoss > curLoss){
-					this.learningRate = 0.01;
-				}else{
-					this.learningRate = 0.1;
-				}
-				prevLoss = curLoss;
-				System.out.println(curLoss);
-				if(epoch % 10 == 0)
-					System.out.println("Optimizing feature " + feature + ", epoch = " + epoch);
+				lastRmse = rmse;
+				rmse = Math.sqrt(sse/data.getSize());
+				//System.out.println(rmse);
 			}//end epoch
 
 			//the feature has been optimized, time to update the partial dot product cache
@@ -169,13 +175,14 @@ public class SVDModel implements LearningModel{
 				Sample s = data.next();
 				String userId = s.getFeatureValues().getUserId();
 				String restId = s.getFeatureValues().getRestaurantId();
-				prevPartialDotProduct[datasetIndex] += userVecs[userIndexMap.get(userId)][feature] * 
-						restVecs[restIndexMap.get(restId)][feature];
+				prevPartialDotProduct[datasetIndex] = predictRating(userIndexMap.get(userId),
+						restIndexMap.get(restId), feature, prevPartialDotProduct[datasetIndex],false); 
 				datasetIndex++;
 			}
+			System.out.println("Optimized feature " + feature);
 		}
 	}
-	
+
 	/**
 	 all user and restaurant vectors get initialized to the return value of this fcn
 
@@ -187,11 +194,28 @@ public class SVDModel implements LearningModel{
 	private double[] getInitialVector(){
 		double[] doub = new double[this.numFeatures];
 		for(int i=0; i<doub.length; i++){
-			doub[i] = 0.1;
+			doub[i] = INIT_VEC;
 		}
 		return doub;
 	}
 
+	private double predictRating(int user, int rest, int feature, double cached, boolean isTrailing){
+		double sum = cached;
+	    if (sum < 1) sum = 1;
+	    // Add contribution of current feature
+	    sum += this.userVecs[user][feature] * this.restVecs[rest][feature];
+	    if (sum > 5) sum = 5;
+	    if (sum < 1) sum = 1;
+
+	    // Add up trailing defaults values
+	    if(isTrailing){
+	        sum += (this.numFeatures-feature-1) * (INIT_VEC * INIT_VEC);
+	        if (sum > 5) sum = 5;
+	        if (sum < 1) sum = 1;
+	    }
+	    return sum;
+	}
+	
 
 	/**
 	 * rating prediction with clipping, again from simon http://www.sifter.org/~simon/journal/20061211.html
@@ -217,6 +241,7 @@ public class SVDModel implements LearningModel{
 				result = 1;
 			}
 		}
+		System.out.println(result);
 		return result;
 	}
 

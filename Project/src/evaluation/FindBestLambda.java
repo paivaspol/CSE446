@@ -9,6 +9,7 @@ import model.ExpectedDifferenceDistanceFunction;
 import model.KNNModel;
 import model.Parameters;
 import model.RidgeRegressionModel;
+import model.ScaledManhattanDistanceFunction;
 import data.RealDataset;
 
 public class FindBestLambda {
@@ -16,7 +17,7 @@ public class FindBestLambda {
 	private static final String FILENAME = "data.train";
 	private static final int maxLambda = 100000;
 	private static final int lambdaStep = 1;
-	private static final int k = 5;
+	private static final int k = 3;
 	
 	public static void main(String[] args) throws Throwable {
 		RealDataset realDataset = new RealDataset(FILENAME);
@@ -25,12 +26,12 @@ public class FindBestLambda {
 		int minLambda = -1;
 		double minErrorRate = Double.MAX_VALUE;
 		long startTime = System.currentTimeMillis();
-		for (int kneighbor : new int[]{2,3}) {
+		for (int kneighbor : new int[]{100}) {
 			out.println("kneighbor = " + kneighbor);
 			out.print("\t");
 			Parameters param = new Parameters();
 			param.setParam(KNNModel.ParameterKeys.K.name(), String.valueOf(kneighbor));
-			CrossValidation cv = new CrossValidation(new KNNModel(param, new ExpectedDifferenceDistanceFunction()), realDataset, k);
+			CrossValidation cv = new CrossValidation(new KNNModel(param, new ScaledManhattanDistanceFunction()), realDataset, k);
 			double result = cv.crossValidate();
 			out.println("error = " + result);
 			errorRate.put(kneighbor, result);
