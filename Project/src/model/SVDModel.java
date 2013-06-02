@@ -149,10 +149,7 @@ public class SVDModel implements LearningModel{
 					//the contributions from the future features
 					double prediction = predictRating(user, rest, feature, prevPartialDotProduct[datasetIndex], true);
 					double error = rating - prediction;
-					if(error > 5){
-						new Scanner(System.in).nextLine();
-						System.out.println(error);
-					}
+	
 					sse += error * error;
 					double prevPu = p_u[feature];
 					double prevQi = q_i[feature];
@@ -241,7 +238,6 @@ public class SVDModel implements LearningModel{
 				result = 1;
 			}
 		}
-		System.out.println(result);
 		return result;
 	}
 
