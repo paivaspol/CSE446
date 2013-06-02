@@ -1,9 +1,7 @@
 package model;
 
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
-import java.util.PriorityQueue;
 
 import data.Dataset;
 import data.FeatureValues;
@@ -18,14 +16,14 @@ public class KernelRegression extends UserBasedInstanceModel{
 	//how many nearest neighbors to look at
 	public enum ParameterKeys{ rho };
 	
-	private int rho;
+	private double rho;
 	private UserDistanceFunction distanceFcn;
 	private Parameters params;
 
 	
 	public KernelRegression(Parameters p, UserDistanceFunction distanceFcn){
 		super();
-		this.rho = Integer.parseInt(p.getParam(ParameterKeys.rho.name()));
+		this.rho = Double.parseDouble(p.getParam(ParameterKeys.rho.name()));
 		this.distanceFcn = distanceFcn;
 		this.params = p;
 		reset();
@@ -36,8 +34,7 @@ public class KernelRegression extends UserBasedInstanceModel{
 		super.baseReset();
 		this.distanceFcn.reset();
 	}
-	
-	
+
 	public Label predictLabel(final FeatureValues featVals){
 		//ratings of the same restaurant by other users
 		List<Sample> coratings = super.reviewMap.get(featVals.getRestaurantId());
@@ -52,8 +49,10 @@ public class KernelRegression extends UserBasedInstanceModel{
 			// compute the weight from all the restaurants
 			double curWeight = computeWeight(s, featVals.getUserId());
 			weightSum += curWeight;
+			System.out.println("\tbbb: " + curWeight);
 			weightedDataSum += curWeight * s.getLabel().getRating();
-		}		
+		}
+		System.out.println("\taaa: " + weightSum);
 		return new Label(weightedDataSum / weightSum);
 	}
 	

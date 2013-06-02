@@ -18,6 +18,7 @@ public class KNNModel extends UserBasedInstanceModel{
 	private int numNearestNeighbor;
 	private UserDistanceFunction distanceFcn;
 	private Parameters params;
+
 	
 	public KNNModel(Parameters p, UserDistanceFunction distanceFcn){
 		super();
@@ -68,7 +69,7 @@ public class KNNModel extends UserBasedInstanceModel{
 			count++;
 		}
 		
-		return new Label(sum/count);
+		return new Label(sum / count);
 	}
 	
 	@Override
