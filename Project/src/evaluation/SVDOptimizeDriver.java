@@ -12,7 +12,7 @@ import config.JoeConfig;
 import data.RealDataset;
 
 public class SVDOptimizeDriver {
-	static final int NUM_FOLD = 3;
+	static final int NUM_FOLD = 5;
 	public static void main(String[] args) throws Exception{		
 		RealDataset realDataset = new RealDataset(JoeConfig.TRAIN_DIR);
 		Map<Double, Double> errorRate = new TreeMap<Double, Double>();
