@@ -49,10 +49,10 @@ public class KernelRegression extends UserBasedInstanceModel{
 			// compute the weight from all the restaurants
 			double curWeight = computeWeight(s, featVals.getUserId());
 			weightSum += curWeight;
-			System.out.println("\tbbb: " + curWeight);
+			//System.out.println("\tbbb: " + curWeight);
 			weightedDataSum += curWeight * s.getLabel().getRating();
 		}
-		System.out.println("\taaa: " + weightSum);
+		//System.out.println("\taaa: " + weightSum);
 		return new Label(weightedDataSum / weightSum);
 	}
 	
@@ -86,6 +86,11 @@ public class KernelRegression extends UserBasedInstanceModel{
 	 */
 	private double computeWeight(Sample s, String queryUserId) {
 		double distance = this.distanceFcn.getDistance(s.getFeatureValues().getUserId(), queryUserId);
+		//if(distance == 0.0)
+		double returnVal = Math.exp((-1 * distance * distance) / (rho * rho));
+		if(returnVal < 0.1){
+		System.out.println("distance between " + s.getFeatureValues().getUserId() + ", and " + queryUserId + " is = " + distance);
+		System.out.println("return val = " + returnVal);}
 		return Math.exp((-1 * distance * distance) / (rho * rho));
 	}
 

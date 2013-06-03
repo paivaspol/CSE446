@@ -109,10 +109,12 @@ public class ExpectedDifferenceDistanceFunction implements UserDistanceFunction{
 
 	@Override
 	public double getDistance(String user1, String user2) {
+		/*
 		UserPair pairKey = new UserPair(user1, user2);
 		if(userPairDistanceCache.containsKey(pairKey)){
-			return userPairDistanceCache.get(pairKey);
-		}
+			System.out.println("cache hit");
+			return userPairDistanceCache.get(pairKey) / restIdSet.size();
+		}*/
 		
 		double expectation = 0.0;
 		for(String restId : restIdSet){
@@ -141,8 +143,8 @@ public class ExpectedDifferenceDistanceFunction implements UserDistanceFunction{
 				}
 			}
 		}
-		userPairDistanceCache.put(pairKey, expectation);
-		return expectation;
+		//userPairDistanceCache.put(pairKey, expectation);
+		return expectation / restIdSet.size();
 	}
 	
 	/**

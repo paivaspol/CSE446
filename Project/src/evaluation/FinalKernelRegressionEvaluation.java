@@ -26,7 +26,7 @@ public class FinalKernelRegressionEvaluation {
 		
 		Parameters param = new Parameters();
 		param.setParam(KernelRegression.ParameterKeys.rho.name(), String.valueOf(BEST_RHO));
-		LearningModel model = new KernelRegression(param, new ExpectedDifferenceDistanceFunction());
+		LearningModel model = new KernelRegression(param, new ScaledManhattanDistanceFunction());
 		System.out.println("Training...");
 		model.train(trainSet);
 		System.out.println("Testing... with ExpectedDifferenceDistanceFunction");
@@ -35,7 +35,7 @@ public class FinalKernelRegressionEvaluation {
 		System.out.println("MSE for expected MD = " + MSE);
 		long endTime = System.currentTimeMillis();
 		System.out.println("Elapsed time = " + (endTime - startTime) + "ms.");
-		
+		/*
 		long startTime2 = System.currentTimeMillis();
 		LearningModel model2 = new KernelRegression(param, new ScaledManhattanDistanceFunction());
 		System.out.println("Training...");
@@ -45,7 +45,7 @@ public class FinalKernelRegressionEvaluation {
 		double MSE2 = EvaluationUtils.calcAvgSSE(predictions2, testSet);
 		System.out.println("MSE for expected MD = " + MSE2);
 		long endTime2 = System.currentTimeMillis();
-		System.out.println("Elapsed time = " + (endTime2 - startTime2) + "ms.");
+		System.out.println("Elapsed time = " + (endTime2 - startTime2) + "ms.");*/
 	}
 
 }
