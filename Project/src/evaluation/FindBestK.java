@@ -16,8 +16,8 @@ import data.RealDataset;
 public class FindBestK {
 	
 	private static final String FILENAME = "data.train";
-	private static final int maxLambda = 25;
-	private static final int lambdaStep = 5;
+	private static final int maxLambda = 5;
+	private static final int lambdaStep = 1;
 	private static final int kFold = 5;
 	
 	public static void main(String[] args) throws Throwable {
@@ -27,7 +27,7 @@ public class FindBestK {
 		int minLambda = -1;
 		double minErrorRate = Double.MAX_VALUE;
 		long startTime = System.currentTimeMillis();
-		for (int i = 5; i <= maxLambda; i += lambdaStep) {
+		for (int i = 1; i <= maxLambda; i += lambdaStep) {
 			out.println("lambda = " + i);
 			out.print("\t");
 			Parameters param = new Parameters();

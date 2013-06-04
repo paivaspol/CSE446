@@ -13,8 +13,8 @@ import data.RealDataset;
 public class FindBestRhoForKernelRegression {
 	
 	private static final String FILENAME = "data.train";
-	private static final double FIRST_RHO = 3.8;
-	private static final double MAX_RHO = 5.0;
+	private static final double FIRST_RHO = 1000000;
+	private static final double MAX_RHO = 1000000;
 	private static final double RHO_STEP = 0.2;
 	private static final int kFold = 5;
 	
